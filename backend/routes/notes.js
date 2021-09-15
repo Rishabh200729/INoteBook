@@ -64,28 +64,28 @@ router.put("/update-note/:id", fetchUser, async (req, res) => {
     if(note.user.toString() !== req.user.id){
         return res.status(401).send("Not allowed");
     }
-    note = await Note.findByIdAndUpdate(req.params.id, {$set : newNote } , { new : true});
+    note = await Note.findByIdAndUpdate(req.params.id, {$set : newNote } , { new : true });
     res.json({note});
 });
 
 // Route 4 :delete a existing note using DELETE : "/api/notes/delete-note". Login required
 router.delete("/delete-note/:id", fetchUser, async (req, res) => {
-    const note = await Note.findById(req.params.id)
-    if(!note){
-        return res.status(404).send("No note found");
-    }else {
-        await Note.deleteOne({ id : note.id},(error, doc)=>{
-            if(error){
-                return res.status(400).send("Bad request");
-            }else{
-                return res.json({
-                    doc,
-                    "msg":"deleted note"
-                })
-            }
-        });
+    try {
+        const note = await Note.findById(req.params.id)
+        if(!note){
+            return res.status(404).send("No note found");
+        }
+        console.log(typeof note.user);
+        if(note.user.toString() !== req.user.id){
+            return res.status(401).send("Not allowed");
+        }
+        note = await Note.findOneAndDelete(req.params.id);
+        res.json(note);
+    }catch(error){
+        console.error(e.message);
+        res.status(500).send("Internal server error.");
     }
-
 });
-
+// assertion : scattering of red color is least as compared to scattering of other colors 
+// reasoning : intensity of scattering lght is inversely proportional to the wavelength and velocity
 module.exports = router;
